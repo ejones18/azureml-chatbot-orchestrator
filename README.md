@@ -42,21 +42,62 @@ A proof-of-concept that lets users submit Azure Machine Learning jobs through na
 ## Prerequisites
 
 - Python 3.11+
-- Azure CLI (`az`) logged in
+- Azure CLI (`az`) logged in with the `ml` extension installed (`az extension add --name ml`)
 - [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-tools?tabs=v4&pivots=programming-language-python) v4
-- An Azure subscription with:
-  - An **AI Foundry** project with a model deployment (e.g., `gpt-4.1-mini`)
-  - An **Azure ML** workspace with a compute cluster
-  - An **Azure Function App** (Python, Linux Consumption)
 
 ## Azure Resources
 
+The following resources must exist before deploying. If you already have them, skip to [Setup](#setup).
+
 | Resource | Purpose |
 |---|---|
+| Resource group | Container for all resources |
 | AI Foundry project | Hosts the agent and model deployment |
 | Azure Function App | HTTP-triggered function that submits AML jobs |
 | Azure ML workspace | Runs the job on a compute cluster |
+| AML compute cluster | Executes the submitted jobs |
 | Key Vault | Stores the service principal client secret (cross-tenant only) |
+
+### Provision Infrastructure
+
+```bash
+# Variables — update these to match your environment
+RG_NAME="<RESOURCE_GROUP>"
+LOCATION="<REGION>"                          # e.g., eastus
+FUNCTION_APP_NAME="<FUNCTION_APP_NAME>"
+STORAGE_ACCOUNT="<STORAGE_ACCOUNT_NAME>"     # required by the Function App
+AML_WORKSPACE="<WORKSPACE_NAME>"
+COMPUTE_NAME="cpu-cluster"
+
+# 1. Create a resource group
+az group create --name $RG_NAME --location $LOCATION
+
+# 2. Create an Azure ML workspace
+az ml workspace create --name $AML_WORKSPACE --resource-group $RG_NAME --location $LOCATION
+
+# 3. Create a compute cluster in the AML workspace
+az ml compute create --name $COMPUTE_NAME --type AmlCompute \
+  --resource-group $RG_NAME --workspace-name $AML_WORKSPACE \
+  --size Standard_DS3_v2 --min-instances 0 --max-instances 2
+
+# 4. Create a storage account and Function App
+az storage account create --name $STORAGE_ACCOUNT --resource-group $RG_NAME \
+  --location $LOCATION --sku Standard_LRS
+az functionapp create --name $FUNCTION_APP_NAME --resource-group $RG_NAME \
+  --storage-account $STORAGE_ACCOUNT --consumption-plan-location $LOCATION \
+  --runtime python --runtime-version 3.11 --os-type Linux \
+  --functions-version 4
+
+# 5. Enable system-assigned managed identity and grant AML access
+az functionapp identity assign --name $FUNCTION_APP_NAME --resource-group $RG_NAME
+PRINCIPAL_ID=$(az functionapp identity show --name $FUNCTION_APP_NAME \
+  --resource-group $RG_NAME --query principalId -o tsv)
+AML_ID=$(az ml workspace show --name $AML_WORKSPACE --resource-group $RG_NAME \
+  --query id -o tsv)
+az role assignment create --assignee $PRINCIPAL_ID --role "Contributor" --scope $AML_ID
+```
+
+> **AI Foundry project:** Create an AI Foundry project and deploy a model (e.g., `gpt-4.1-mini`) via the [Azure AI Foundry portal](https://ai.azure.com). The project endpoint will be needed in step 5 of setup.
 
 ## Setup
 
