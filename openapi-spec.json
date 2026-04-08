@@ -1,0 +1,71 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Azure ML Job Submission API",
+    "description": "API to submit hello_world.py jobs to Azure Machine Learning.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://<YOUR_FUNCTION_APP_NAME>.azurewebsites.net",
+      "description": "Azure Function App"
+    }
+  ],
+  "paths": {
+    "/api/submit-job": {
+      "post": {
+        "operationId": "submit-aml-job",
+        "summary": "Submit a hello world job to Azure Machine Learning",
+        "description": "Submits a hello_world.py sample script as a command job on Azure ML. Returns the job name, status, and a link to Azure ML Studio.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "display_name": {
+                    "type": "string",
+                    "description": "A friendly display name for the ML job. Defaults to hello-world-foundry-agent."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Job submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "job_name": { "type": "string" },
+                    "job_status": { "type": "string" },
+                    "studio_url": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error submitting job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

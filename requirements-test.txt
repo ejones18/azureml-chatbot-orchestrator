@@ -1,0 +1,5 @@
+# Additional dependencies for test_bot_registration.py (not needed by the Function App).
+# Install with: pip install -r requirements-test.txt
+-r requirements.txt
+azure-ai-projects
+jsonref

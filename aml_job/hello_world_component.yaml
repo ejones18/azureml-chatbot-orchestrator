@@ -1,0 +1,22 @@
+# Azure ML component definition for the hello_world sample job.
+#
+# Register this component in your AML workspace before running the Function App:
+#   az ml component create --file aml_job/hello_world_component.yaml \
+#     --workspace-name <WORKSPACE> --resource-group <RG>
+#
+# Once registered, the Function App retrieves it by name/version and submits
+# it as a command job on the configured compute cluster.
+
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: hello_world_job
+version: "1"
+display_name: Hello World Sample Job
+description: Hello World POC job submitted from Foundry agent
+
+code: ./
+
+command: python hello_world.py
+
+environment: azureml://registries/azureml/environments/sklearn-1.5/labels/latest
