@@ -25,7 +25,7 @@ A proof-of-concept that lets users submit Azure Machine Learning jobs through na
 ## Project Structure
 
 ```
-func-app/
+.
 ├── function_app.py                    # Azure Function — submits AML jobs via azure-ai-ml SDK
 ├── test_bot_registration.py           # Script to create/test the Foundry agent locally
 ├── openapi-spec.json                  # OpenAPI 3.0 spec for the submit-job endpoint
@@ -63,7 +63,6 @@ func-app/
 ### 1. Deploy the Azure Function
 
 ```bash
-cd func-app
 func azure functionapp publish <YOUR_FUNCTION_APP_NAME> --python
 ```
 
