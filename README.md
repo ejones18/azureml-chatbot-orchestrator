@@ -1,6 +1,6 @@
-# AI Foundry Agent — Azure ML Job Submission
+# AI Foundry Agent -> Azure ML Job Submission
 
-A proof-of-concept that lets users submit Azure Machine Learning jobs through natural language. An AI Foundry agent is equipped with an OpenAPI tool that calls an Azure Function to submit AML jobs.
+A proof-of-concept that lets users submit Azure Machine Learning jobs through natural language. An AI Foundry agent is equipped with an OpenAPI tool that calls an Azure Function to submit AML jobs - currently configured to submit a 'hello_world' Python script.
 
 ## Architecture
 
